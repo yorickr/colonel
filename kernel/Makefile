@@ -32,20 +32,8 @@ $(KERNEL_ARCH_OBJS) \
 kernel/kernel.o \
 
 OBJS=\
-$(ARCHDIR)/crti.o \
-$(ARCHDIR)/crtbegin.o \
 $(KERNEL_OBJS) \
-$(ARCHDIR)/crtend.o \
-$(ARCHDIR)/crtn.o \
 
-LINK_LIST=\
-$(LDFLAGS) \
-$(ARCHDIR)/crti.o \
-$(ARCHDIR)/crtbegin.o \
-$(KERNEL_OBJS) \
-$(LIBS) \
-$(ARCHDIR)/crtend.o \
-$(ARCHDIR)/crtn.o \
 
 .PHONY: all clean install install-headers install-kernel
 .SUFFIXES: .o .c .S
@@ -53,7 +41,7 @@ $(ARCHDIR)/crtn.o \
 all: colonel.kernel
 
 colonel.kernel: $(OBJS) $(ARCHDIR)/linker.ld
-	$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(LINK_LIST)
+	$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(OBJS) $(LDFLAGS) $(LIBS)
 	# grub-file --is-x86-multiboot colonel.kernel
 
 $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
