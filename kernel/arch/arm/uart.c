@@ -1,22 +1,27 @@
 #include <kernel/uart.h>
 #include <kernel/mmio.h>
+#include <kernel/gpio.h>
 
 void uart_init()
 {
-	// Disable UART0.
+	// Disable UART0 by clearing the first bit
 	mmio_write(UART0_CR, 0x00000000);
 	// Setup the GPIO pin 14 && 15.
 
 	// Disable pull up/down for all GPIO pins & delay for 150 cycles.
-	mmio_write(GPPUD, 0x00000000);
+	// Described in page 101 of the docs.
+	// mmio_write(GPPUD, 0x00000000);
+	gpio_write_pud(0x00000000);
 	delay(150);
 
 	// Disable pull up/down for pin 14,15 & delay for 150 cycles.
-	mmio_write(GPPUDCLK0, (1 << 14) | (1 << 15));
+	// mmio_write(GPPUDCLK0, (1 << 14) | (1 << 15));
+	gpio_write_pudclk(0, (1 << 14) | (1 << 15));
 	delay(150);
 
 	// Write 0 to GPPUDCLK0 to make it take effect.
-	mmio_write(GPPUDCLK0, 0x00000000);
+	gpio_write_pudclk(0, 0x00000000);
+	// mmio_write(GPPUDCLK0, 0x00000000);
 
 	// Clear pending interrupts.
 	mmio_write(UART0_ICR, 0x7FF);
