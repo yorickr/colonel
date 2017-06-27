@@ -38,8 +38,13 @@ $(KERNEL_OBJS) \
 .PHONY: all clean install install-headers install-kernel
 .SUFFIXES: .o .c .S
 
-all: colonel.kernel
+all: kernel.img
 
+# bin/img file
+kernel.img: colonel.kernel
+	$(OBJ) $< -O binary $@
+
+# elf file
 colonel.kernel: $(OBJS) $(ARCHDIR)/linker.ld
 	$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(OBJS) $(LDFLAGS) $(LIBS)
 	# grub-file --is-x86-multiboot colonel.kernel
@@ -58,7 +63,7 @@ clean:
 	rm -f $(OBJS) *.o */*.o */*/*.o
 	rm -f $(OBJS:.o=.d) *.d */*.d */*/*.d
 
-install: install-headers install-kernel
+install: install-headers install-kernel kernel.img
 
 install-headers:
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)
@@ -66,6 +71,6 @@ install-headers:
 
 install-kernel: colonel.kernel
 	mkdir -p $(DESTDIR)$(BOOTDIR)
-	cp colonel.kernel $(DESTDIR)$(BOOTDIR)
+	cp $< $(DESTDIR)$(BOOTDIR)
 
 -include $(OBJS:.o=.d)

@@ -14,6 +14,17 @@ enum {
     // Controls actuation of pull up/down for specific GPIO pin.
     GPPUDCLK0 = (GPIO_BASE + 0x98),
     GPPUDCLK1 = (GPIO_BASE + 0x9C),
+
+    GPFSEL0 = (GPIO_BASE + 0x0),
+    GPFSEL1 = (GPIO_BASE + 0x4),
+    GPFSEL2 = (GPIO_BASE + 0x8),
+    GPFSEL3 = (GPIO_BASE + 0xC),
+    GPFSEL4 = (GPIO_BASE + 0x10),
+    GPFSEL5 = (GPIO_BASE + 0x14),
+
+    GPSET0 = (GPIO_BASE + 0x1C),
+    GPSET1 = (GPIO_BASE + 0x20),
+
 };
 
 #endif

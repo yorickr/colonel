@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <kernel/uart.h>
 #include <kernel/tty.h>
+#include <kernel/gpio.h>
+#include <kernel/mmio.h>
 
 
 #if defined(__cplusplus)
@@ -28,4 +30,9 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags) {
 	#elif _RPI_2
 	terminal_writestring("This is a raspberry pi 2 or 3\n");
 	#endif
+	while(1) {
+		// gpio_set_pin(1, POWER_HIGH);
+		// delay(10000);
+		terminal_writestring("Hello world\n");
+	}
 }
