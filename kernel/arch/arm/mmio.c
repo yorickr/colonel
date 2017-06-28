@@ -11,6 +11,10 @@ uint32_t mmio_read(uint32_t reg)
 	return *(volatile uint32_t*)reg;
 }
 
+long long mmio_read_len(uint32_t reg) {
+	return *(volatile long long*)reg;
+}
+
 // Loop <delay> times in a way that the compiler won't optimize away
 void delay(int32_t count)
 {

@@ -12,6 +12,24 @@ static bool print(const char* data, size_t length) {
 	return true;
 }
 
+char *convert(unsigned int num, int base)
+{
+	static char rep[]= "0123456789ABCDEF";
+	static char buffer[50];
+	char *ptr;
+
+	ptr = &buffer[49];
+	*ptr = '\0';
+
+	do
+	{
+		*--ptr = rep[num % base];
+		num /= base;
+	} while(num != 0);
+
+	return(ptr);
+}
+
 int printf(const char* restrict format, ...) {
 	va_list parameters;
 	va_start(parameters, format);
@@ -40,7 +58,46 @@ int printf(const char* restrict format, ...) {
 
 		const char* format_begun_at = format++;
 
-		if (*format == 'c') {
+		if (*format == 'd') {
+			format++;
+			int i = va_arg(parameters, int);
+			if (!maxrem) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			char* str = convert(i, 10);
+			size_t len = strlen(str);
+			if (!print(str, len)) {
+				return -1;
+			}
+			written += len;
+		} else if (*format == 'l') {
+			format++;
+			unsigned long long i = va_arg(parameters, unsigned long long);
+			if (!maxrem) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			char* str = convert(i, 10);
+			size_t len = strlen(str);
+			if (!print(str, len)) {
+				return -1;
+			}
+			written += len;
+		} else if (*format == 'b') {
+			format++;
+			unsigned long long i = va_arg(parameters, unsigned long long);
+			if (!maxrem) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+			char* str = convert(i, 2);
+			size_t len = strlen(str);
+			if (!print(str, len)) {
+				return -1;
+			}
+			written += len;
+		} else if (*format == 'c') {
 			format++;
 			char c = (char) va_arg(parameters, int /* char promotes to int */);
 			if (!maxrem) {

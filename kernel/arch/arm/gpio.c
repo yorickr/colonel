@@ -21,6 +21,10 @@ void gpio_set_pin(uint8_t pin, uint8_t value) {
     // We need to write 0b 10 000 000 000 000 000 to GPCLR0
     // If pin = 35, value is POWER_LOW
     // We need to write  0b 1 000 to GPCLR1
+
+    if (pin > 53) { // if not a valid pin
+        return;
+    }
     switch (value) {
         case POWER_LOW:
             mmio_write(GPCLR0 + (floor(pin / 32) * 0x4), 1 << (pin % 32));
@@ -39,5 +43,9 @@ void gpio_set_pin_mode(uint8_t pin, uint8_t value) {
     // If pin = 2, value = PIN_OUTPUT, this returns 0b 001 000 000
     // To select the proper register,
     // 10/10 = 1, so register 1 instead of 0.
+    if (pin > 53) {
+        return;
+    }
+
     mmio_write(GPFSEL0 + (floor(pin / 10) * 0x4), value << ((pin % 10) * 3)); // select the pin in our register
 }

@@ -79,7 +79,7 @@ clean:
 	rm -f $(OBJS) *.o */*.o */*/*.o
 	rm -f $(OBJS:.o=.d) *.d */*.d */*/*.d
 
-install: install-headers install-kernel $(KERNEL_IMG)
+install: install-headers install-kernel $(KERNEL_IMG) $(LIST)
 
 install-headers:
 	mkdir -p $(DESTDIR)$(INCLUDEDIR)
