@@ -2,6 +2,8 @@
 #include <kernel/mmio.h>
 #include <kernel/gpio.h>
 
+#include <math.h>
+
 void gpio_write_pud(uint32_t data) {
     mmio_write(GPPUD, data);
 }
@@ -14,39 +16,28 @@ void gpio_write_pudclk(uint8_t clock_register, uint32_t data) {
     }
 }
 
-// Write 001 to GPFSEL for output, 000 for input.
-// if output, write to GPSET or GPCLR
-// if input, configure PUD, read from GPLEV
-
 void gpio_set_pin(uint8_t pin, uint8_t value) {
-    // GPFSEL0 = pin 0 to 9
-    // GPFSEL1 = pin 10 to 19
-    // GPFSEL2 = pin 20 to 29
-    // GPFSEL3 = pin 30 to 39
-    // GPFSEL4 = pin 40 to 49
-    // GPFSEL5 = pin 50 to 53
-    if (0 >= pin && pin <= 9) {
-        mmio_write(GPFSEL0, value << pin);
-        mmio_write(GPSET0, 1 << pin);
-    } else if (10 >= pin && pin <= 19) {
-        mmio_write(GPFSEL1, value << pin);
-        mmio_write(GPSET0, 1 << pin);
-    } else if (20 >= pin && pin <= 29) {
-        mmio_write(GPFSEL2, value << pin);
-        mmio_write(GPSET0, 1 << pin);
-    } else if (30 >= pin && pin <= 39) {
-        mmio_write(GPFSEL3, value << pin);
-        // TODO: test
-        if (30 >= pin && pin <= 31) {
-            mmio_write(GPSET0, 1 << pin);
-        } else {
-            mmio_write(GPSET1, 1 << pin);
-        }
-    } else if (40 >= pin && pin <= 49) {
-        mmio_write(GPFSEL4, value << pin);
-        mmio_write(GPSET1, 1 << pin);
-    } else if (50 >= pin && pin <= 53) {
-        mmio_write(GPFSEL5, value << pin);
-        mmio_write(GPSET1, 1 << pin);
+    // If pin = 16, value is POWER_LOW (0)
+    // We need to write 0b 10 000 000 000 000 000 to GPCLR0
+    // If pin = 35, value is POWER_LOW
+    // We need to write  0b 1 000 to GPCLR1
+    switch (value) {
+        case POWER_LOW:
+            mmio_write(GPCLR0 + (floor(pin / 32) * 0x4), 1 << (pin % 32));
+            break;
+        case POWER_HIGH:
+            mmio_write(GPSET0 + (floor(pin / 32) * 0x4), 1 << (pin % 32));
+            break;
     }
+}
+
+// set to output or input, value being either PIN_INPUT or PIN_OUTPUT
+void gpio_set_pin_mode(uint8_t pin, uint8_t value) {
+    // Lets say pin = 16, value = PIN_OUTPUT (so 0b001),
+    // We have to select the pin by shifting VALUE left, every 3 bits (hence the *3)
+    // So if pin = 16, value = PIN_OUTPUT, this will return 0b 001 000 000 000 000 000 000
+    // If pin = 2, value = PIN_OUTPUT, this returns 0b 001 000 000
+    // To select the proper register,
+    // 10/10 = 1, so register 1 instead of 0.
+    mmio_write(GPFSEL0 + (floor(pin / 10) * 0x4), value << ((pin % 10) * 3)); // select the pin in our register
 }

@@ -32,9 +32,9 @@ void uart_init()
 	// UART_CLOCK = 3000000; Baud = 115200.
 
 	// Divider = 3000000 / (16 * 115200) = 1.627 = ~1.
-	mmio_write(UART0_IBRD, 19);
+	mmio_write(UART0_IBRD, 1);
 	// Fractional part register = (.627 * 64) + 0.5 = 40.6 = ~40.
-	mmio_write(UART0_FBRD, 34);
+	mmio_write(UART0_FBRD, 40);
 
 	// Enable FIFO & 8 bit data transmissio (1 stop bit, no parity).
 	mmio_write(UART0_LCRH, (1 << 4) | (1 << 5) | (1 << 6));
@@ -50,14 +50,14 @@ void uart_init()
 void uart_putc(unsigned char c)
 {
 	// Wait for UART to become ready to transmit.
-	while ( mmio_read(UART0_FR) & (1 << 5) ) { }
+	while ( mmio_read(UART0_FR) & (1 << 5) ) { } // while transmit fifo is full (not empty)
 	mmio_write(UART0_DR, c);
 }
 
 unsigned char uart_getc()
 {
     // Wait for UART to have received something.
-    while ( mmio_read(UART0_FR) & (1 << 4) ) { }
+    while ( mmio_read(UART0_FR) & (1 << 4) ) { } // while receive fifo is empty
     return mmio_read(UART0_DR);
 }
 

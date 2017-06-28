@@ -25,6 +25,9 @@ enum {
     GPSET0 = (GPIO_BASE + 0x1C),
     GPSET1 = (GPIO_BASE + 0x20),
 
+    GPCLR0 = (GPIO_BASE + 0x28),
+    GPCLR1 = (GPIO_BASE + 0x2C),
+
 };
 
 #endif
