@@ -7,7 +7,8 @@ export HOST=${HOST:-$(./default-host.sh)}
 export AR=${HOST}-ar
 export AS=${HOST}-as
 export CC=${HOST}-gcc
-export OBJ=${HOST}-objcopy
+export OBJC=${HOST}-objcopy
+export OBJD=${HOST}-objdump
 
 export PREFIX=/usr
 export EXEC_PREFIX=$PREFIX

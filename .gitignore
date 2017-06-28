@@ -3,3 +3,5 @@ isodir
 sysroot
 *.img
 *.kernel
+*.list
+*.map

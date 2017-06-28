@@ -39,18 +39,27 @@ KERNEL_IMG=kernel.img
 # Elf image
 COLONEL=colonel.kernel
 
+# List file
+LIST=colonel.list
+
+# Map file
+MAP=colonel.map
+
 .PHONY: all clean install install-headers install-kernel
 .SUFFIXES: .o .c .S
 
-all: $(KERNEL_IMG)
+all: $(KERNEL_IMG) $(LIST)
 
 # bin/img file
 $(KERNEL_IMG): $(COLONEL)
-	$(OBJ) $< -O binary $@
+	$(OBJC) $< -O binary $@
+
+$(LIST): $(COLONEL)
+	$(OBJD) -d $< > $@
 
 # elf file
 $(COLONEL): $(OBJS) $(ARCHDIR)/linker.ld
-	$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(OBJS) $(LDFLAGS) $(LIBS)
+	$(CC) -T $(ARCHDIR)/linker.ld -o $@ $(CFLAGS) $(OBJS) $(LDFLAGS) $(LIBS) -Xlinker -Map=$(MAP)
 	# grub-file --is-x86-multiboot $(COLONEL)
 
 $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
@@ -64,6 +73,9 @@ $(ARCHDIR)/crtbegin.o $(ARCHDIR)/crtend.o:
 
 clean:
 	rm -f $(COLONEL)
+	rm -f $(LIST)
+	rm -f $(MAP)
+	rm -f $(KERNEL_IMG)
 	rm -f $(OBJS) *.o */*.o */*/*.o
 	rm -f $(OBJS:.o=.d) *.d */*.d */*/*.d
 
