@@ -15,6 +15,8 @@ enum {
 
 void sleep(uint64_t sleep);
 
+void sleep_inaccurate(uint64_t sleep);
+
 uint64_t micros();
 
 #endif
