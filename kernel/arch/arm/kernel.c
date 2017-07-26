@@ -17,33 +17,30 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags) {
 
 	gpio_set_pin_mode(16, PIN_OUTPUT);
 	gpio_set_pin(16, POWER_LOW);
-
-	terminal_initialize();
-
-	terminal_writestring("Hello, kernel World!\n");
-
-	terminal_writestring("Hello line two\n");
-	for (size_t i = 0; i < 100; i++) {
-		terminal_writestring("Hello multiple lines\n");
-	}
-	terminal_writestring("Here is another final string\n");
-	terminal_writestring("Here is the actual final string\n");
-	#ifdef _RPI_1
-	terminal_writestring("This is a raspberry pi 1 or pi zero\n");
-	#elif _RPI_2
-	terminal_writestring("This is a raspberry pi 2 or 3\n");
-	#endif
-	// printf("Char is %c\n", x);
-	// int bot = 0b001;
-	// int top = 0b100;
-	// int result = 0b100001; // should be this.
-	// printf("Int is %d\n", bot);
-	// printf("Int is %d\n", top);
-	// printf("Int is %d\n", (top << 3) + bot);
+	uart_init();
+	uart_puts("Hello, kernel World!\r\n");
+	// terminal_initialize();
+	//
+	// terminal_writestring("Hello, kernel World!\n");
+	//
+	// terminal_writestring("Hello line two\n");
+	// for (size_t i = 0; i < 100; i++) {
+	// 	terminal_writestring("Hello multiple lines\n");
+	// }
+	// terminal_writestring("Here is another final string\n");
+	// terminal_writestring("Here is the actual final string\n");
+	// #ifdef _RPI_1
+	// terminal_writestring("This is a raspberry pi 1 or pi zero\n");
+	// #elif _RPI_2
+	// terminal_writestring("This is a raspberry pi 2 or 3\n");
+	// #endif
 	while(1) {
 		gpio_set_pin(16, POWER_HIGH);
-		terminal_writestring("Set pin to high\n");
+		// terminal_writestring("Set pin to high\n");
+		sleep(1000000);
 		gpio_set_pin(16, POWER_LOW);
-		terminal_writestring("Set pin to low\n");
+		// terminal_writestring("Set pin to low\n");
+		uart_puts("Hello, kernel World!\n");
+		sleep(1000000);
 	}
 }
