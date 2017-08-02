@@ -1,4 +1,5 @@
 #include <kernel/timer.h>
+#include <kernel/mmio.h>
 #include <stdio.h>
 
 // This will only work on the real hardware :(
@@ -10,7 +11,7 @@ void sleep(uint64_t sleep) {
 }
 
 void sleep_inaccurate(uint64_t sleep) {
-    for (uint64_t i = 0; i < sleep; i++) {}
+    delay(sleep * 300000);
 }
 
 uint64_t micros() {

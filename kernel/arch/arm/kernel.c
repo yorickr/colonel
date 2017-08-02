@@ -35,12 +35,11 @@ void kernel_main(uint32_t r0, uint32_t r1, uint32_t atags) {
 	// terminal_writestring("This is a raspberry pi 2 or 3\n");
 	// #endif
 	while(1) {
-		gpio_set_pin(16, POWER_HIGH);
+		// gpio_set_pin(16, POWER_HIGH);
 		// terminal_writestring("Set pin to high\n");
-		sleep(1000000);
-		gpio_set_pin(16, POWER_LOW);
+		// gpio_set_pin(16, POWER_LOW);
 		// terminal_writestring("Set pin to low\n");
 		uart_puts("Hello, kernel World!\n");
-		sleep(1000000);
+		sleep_inaccurate(1000);
 	}
 }
