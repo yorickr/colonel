@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <kernel/tty.h>
 
+#include <kernel/port.h>
+
 
 #if defined(__cplusplus)
 extern "C" /* Use C linkage for kernel_main. */
@@ -18,6 +20,8 @@ void kernel_main(void) {
 	}
 	terminal_writestring("Here is another final string\n");
 	terminal_writestring("Here is the actual final string\n");
+	idt_init();
+
 	while(1) {
 	}
 }
