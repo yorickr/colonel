@@ -1,2 +1,2 @@
 #!/bin/sh
-echo arm-none-eabi
+echo i686-elf
