@@ -3,12 +3,8 @@
 
 #include <stdint.h>
 
-#include <kernel/tty.h>
+void outb(uint16_t port, uint8_t val);
 
-static inline void outb(uint16_t port, uint8_t val);
-
-static inline uint8_t inb(uint16_t port);
-
-void idt_init();
+uint8_t inb(uint16_t port);
 
 #endif
