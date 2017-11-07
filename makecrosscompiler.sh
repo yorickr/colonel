@@ -2,6 +2,7 @@
 
 if [ ! $# == 2 ]; then
     echo "Usage: $0 /path/to/directory target-cc"
+    echo "Depends on tar, wget, unzip and make"
     exit
 fi
 
