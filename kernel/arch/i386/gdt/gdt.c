@@ -16,7 +16,7 @@ struct GDT_entry GDT[GDT_SIZE] = {
 void gdt_init() {
 	struct gdt_ptr gdt_ptr;
 
-	gdt_ptr.base = (unsigned long)GDT;
+	gdt_ptr.base = (uint32_t)GDT;
 	gdt_ptr.limit = sizeof(GDT);
 	load_gdt(&gdt_ptr);
 }

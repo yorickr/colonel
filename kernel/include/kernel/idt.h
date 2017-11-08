@@ -13,6 +13,11 @@ struct IDT_entry{
 	uint16_t offset_2; // offset bits 16..31
 } __attribute__((packed));
 
+struct idt_ptr {
+	uint32_t limit;
+	uint32_t base;
+} __attribute__((packed));
+
 #define IDT_SIZE 256
 #define INTERRUPT_GATE 0x8e
 #define KERNEL_CODE_SEGMENT_OFFSET 0x08

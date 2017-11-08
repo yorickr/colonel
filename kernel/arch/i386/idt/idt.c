@@ -1,16 +1,15 @@
 #include <kernel/idt.h>
 
-extern void load_idt(unsigned long *idt_ptr);
+extern void load_idt(struct idt_ptr *idt_ptr);
 
 extern void keyboard_handler();
 
 void idt_init() {
-	unsigned long keyboard_address;
-	unsigned long idt_address;
-	unsigned long idt_ptr[2];
+	uint32_t keyboard_address;
+	uint32_t idt_address;
 
 	/* populate IDT entry of keyboard's interrupt */
-	keyboard_address = (unsigned long)keyboard_handler;
+	keyboard_address = (uint32_t)keyboard_handler;
 	IDT[0x21].offset_1 = keyboard_address & 0xffff;
 	IDT[0x21].selector = KERNEL_CODE_SEGMENT_OFFSET; /* KERNEL_CODE_SEGMENT_OFFSET */
 	IDT[0x21].zero = 0;
@@ -49,11 +48,13 @@ void idt_init() {
 	outb(0xA1 , 0xff);
 
 	/* fill the IDT descriptor */
-	idt_address = (unsigned long)IDT ;
-	idt_ptr[0] = (sizeof (struct IDT_entry) * IDT_SIZE) + ((idt_address & 0xffff) << 16);
-	idt_ptr[1] = idt_address >> 16 ;
+	// The IDT descriptor consists of a limit and a base.
+	struct idt_ptr idt_ptr;
+	idt_address = (uint32_t)IDT ;
+	idt_ptr.limit = (sizeof (struct IDT_entry) * IDT_SIZE) + ((idt_address & 0xffff) << 16);
+	idt_ptr.base = idt_address >> 16 ;
 
-    load_idt(idt_ptr);
+    load_idt(&idt_ptr);
 	// asm volatile ( "lidt %0" : : "m"(idt_ptr));
 	// asm volatile ( "sti" );
 }
