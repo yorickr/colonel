@@ -41,12 +41,12 @@ unsigned char keyboard_map[128] =
 };
 
 void kb_init() {
-	/* 0xFD is 11111101 - enables only IRQ1 (keyboard)*/
+	// 11111101 - enables only IRQ1 which is the keyboard
 	outb(0x21 , 0xFD);
 }
 
 void keyboard_handler_main() {
-	outb(0x20, 0x20);
+	outb(0x20, 0x20); // send EOI, End of Interrupt.
 
 	uint8_t status = inb(KEYBOARD_STATUS_PORT);
 	if (status & 0x01) {
