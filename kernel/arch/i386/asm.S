@@ -1,21 +1,6 @@
-.global load_idt
-.global load_gdt
-
 .global keyboard_handler
 
 .extern keyboard_handler_main
-
-
-load_idt:
-    mov 0x4(%esp), %edx
-    lidtl (%edx)
-    sti
-    ret
-
-load_gdt:
-    mov 0x4(%esp), %edx
-    lgdtl (%edx)
-    ret
 
 keyboard_handler:
 	push %ds
