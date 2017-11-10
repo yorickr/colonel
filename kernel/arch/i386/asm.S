@@ -17,3 +17,7 @@ keyboard_handler:
 	pop %fs
 	pop %gs
 	iret
+
+.global as_sti
+as_sti:
+	sti
