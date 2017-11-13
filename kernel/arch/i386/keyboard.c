@@ -50,11 +50,12 @@ unsigned char keyboard_map[128] =
 void keyboard_handler() {
     uint8_t status = inb(KEYBOARD_STATUS_PORT);
     if (status & 0x01) {
-        char keycode = inb(KEYBOARD_DATA_PORT);
+        char keycode = inb(KEYBOARD_DATA_PORT); // do not forget to read the key.
         if (keycode < 0) {
             return;
         }
         uint8_t key = keyboard_map[keycode];
+        // printf("Received keycode %d which is %d %c\n", keycode, key, key);
         terminal_putchar(key);
     }
 }

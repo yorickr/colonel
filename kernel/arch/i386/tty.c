@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include <kernel/tty.h>
+#include <kernel/port.h>
 
 #include "vga.h"
 
@@ -27,6 +28,31 @@ void terminal_initialize(void) {
 			terminal_buffer[index] = vga_entry(' ', terminal_color);
 		}
 	}
+
+	terminal_cursor_enable(14, 15);
+	// terminal_cursor_disable();
+}
+
+void terminal_cursor_enable(uint8_t cursor_start, uint8_t cursor_end) {
+	outb(0x3D4, 0x0A);
+	outb(0x3D5, (inb(0x3D5) & 0xC0) | cursor_start);
+
+	outb(0x3D4, 0x0B);
+	outb(0x3D5, (inb(0x3E0) & 0xE0) | cursor_end);
+}
+
+void terminal_cursor_disable() {
+	outb(0x3D4, 0x0A);
+	outb(0x3D5, 0x20);
+}
+
+void terminal_cursor_move(int x, int y) {
+	uint16_t pos = y * VGA_WIDTH + x;
+
+	outb(0x3D4, 0x0F);
+	outb(0x3D5, (uint8_t) (pos & 0xFF));
+	outb(0x3D4, 0x0E);
+	outb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
 }
 
 void terminal_setcolor(uint8_t color) {
@@ -53,6 +79,8 @@ void terminal_putchar(char c) {
 	if (c == '\n') {
 		terminal_row++;
 		terminal_column = 0;
+	} else if (c == '\b') {
+		// TODO: implement backspace
 	} else {
 		terminal_putentryat(uc, terminal_color, terminal_column, terminal_row);
 		terminal_column++;
@@ -65,6 +93,7 @@ void terminal_putchar(char c) {
 		terminal_scroll();
 		terminal_row--;
 	}
+	terminal_cursor_move(terminal_column, terminal_row);
 }
 
 void terminal_write(const char* data, size_t size) {
