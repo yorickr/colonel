@@ -89,7 +89,7 @@ void isr_cb(registers_t regs) {
 }
 
 void irq_cb(registers_t regs) {
-    printf("Received irq%d\n", regs.int_no);
+    // printf("Received irq%d\n", regs.int_no);
     if (regs.int_no >= 40) {
         outb(SLAVE_CMD, EOI);
     }
@@ -172,7 +172,6 @@ void idt_init() {
 
 	printf("Loading idt\n");
     load_idt(&idt_ptr);
-	// printf("Enabling interrupts\n");
-	// For some kind of reason the system does not like having interrupts enabled here yet.
-	// as_sti(); // enable interrupts after setting up the idt.
+	printf("Enabling interrupts\n");
+	as_sti(); // enable interrupts after setting up the idt.
 }

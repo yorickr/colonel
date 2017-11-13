@@ -25,10 +25,7 @@ void kernel_main(void) {
 	idt_init();
 
 	kb_init();
-
-	// TODO: Find out why we can't enable interrupts before this point.
-	as_sti();
-
+	
 	while(1) {
 	}
 }
