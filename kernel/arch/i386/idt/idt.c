@@ -5,29 +5,18 @@
 #include <kernel/tty.h>
 #include <kernel/pic.h>
 
-extern void load_idt(struct idt_ptr *idt_ptr);
+#include <stdio.h>
 
-extern void keyboard_handler();
-
-struct registers
-{
-    uint32_t ds;                             // Data segment
-    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax; // Pushed by isr_common_stub
-    uint32_t int_no, err_code;               // Interrupt number and error code
-    uint32_t eip, cs, eflags, useresp, ss;   // Pushed by the processor
-} __attribute__((packed));
-typedef struct registers registers_t;
-
-extern void isr0 ();
-extern void isr1 ();
-extern void isr2 ();
-extern void isr3 ();
-extern void isr4 ();
-extern void isr5 ();
-extern void isr6 ();
-extern void isr7 ();
-extern void isr8 ();
-extern void isr9 ();
+extern void isr0();
+extern void isr1();
+extern void isr2();
+extern void isr3();
+extern void isr4();
+extern void isr5();
+extern void isr6();
+extern void isr7();
+extern void isr8();
+extern void isr9();
 extern void isr10();
 extern void isr11();
 extern void isr12();
@@ -68,18 +57,48 @@ extern void irq13();
 extern void irq14();
 extern void irq15();
 
+struct IDT_entry{
+	uint16_t offset_1; // offset bits 0..15
+	uint16_t selector; // a code segment selector in GDT or LDT
+	uint8_t zero;      // unused, set to 0
+	uint8_t type_attr; // type and attributes
+	uint16_t offset_2; // offset bits 16..31
+} __attribute__((packed));
+
+struct idt_ptr {
+	uint32_t limit;
+	uint32_t base;
+} __attribute__((packed));
+
+extern void load_idt(struct idt_ptr *idt_ptr);
+
+struct IDT_entry IDT[IDT_SIZE];
+isr_cb_t interrupt_cbs[IDT_SIZE];
+
+void register_cb(uint8_t interrupt, isr_cb_t callback) {
+	printf("Registering cb %d\n", interrupt);
+    interrupt_cbs[interrupt] = callback;
+}
+
 void isr_cb(registers_t regs) {
-	terminal_writestring("Received isr\n");
+	printf("Received isr%d\n", regs.int_no);
+    // TODO: a lot.
+	printf("Error code %d\n", regs.err_code);
+
+	as_hlt();
 }
 
 void irq_cb(registers_t regs) {
-    terminal_writestring("Received irq\n");
+    printf("Received irq%d\n", regs.int_no);
     if (regs.int_no >= 40) {
         outb(SLAVE_CMD, EOI);
     }
     outb(MASTER_CMD, EOI); // send EOI
 
     // Handle callback.
+    if (interrupt_cbs[regs.int_no]) {
+        interrupt_cbs[regs.int_no](regs);
+    }
 
 }
 
@@ -92,11 +111,10 @@ void idt_create_entry(uint8_t id, uint32_t base, uint16_t sel, uint8_t flags) {
 }
 
 void idt_init() {
-
+	printf("Initializing idt\n");
 	uint32_t idt_address;
 
-	// populate IDT.
-	// isr0();
+	// populate IDT
 	idt_create_entry( 0, (uint32_t)isr0, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
 	idt_create_entry( 1, (uint32_t)isr1 , KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
     idt_create_entry( 2, (uint32_t)isr2, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
@@ -152,6 +170,9 @@ void idt_init() {
 	idt_ptr.limit = (sizeof (struct IDT_entry) * IDT_SIZE) + ((idt_address & 0xffff) << 16);
 	idt_ptr.base = idt_address >> 16 ;
 
+	printf("Loading idt\n");
     load_idt(&idt_ptr);
-	as_sti(); // enable interrupts after setting up the idt.
+	// printf("Enabling interrupts\n");
+	// For some kind of reason the system does not like having interrupts enabled here yet.
+	// as_sti(); // enable interrupts after setting up the idt.
 }

@@ -3,25 +3,46 @@
 
 #include <stdint.h>
 
-struct IDT_entry{
-	uint16_t offset_1; // offset bits 0..15
-	uint16_t selector; // a code segment selector in GDT or LDT
-	uint8_t zero;      // unused, set to 0
-	uint8_t type_attr; // type and attributes
-	uint16_t offset_2; // offset bits 16..31
-} __attribute__((packed));
-
-struct idt_ptr {
-	uint32_t limit;
-	uint32_t base;
-} __attribute__((packed));
-
 #define IDT_SIZE 256
 #define INTERRUPT_GATE 0x8e
 #define KERNEL_CODE_SEGMENT_OFFSET 0x08
 
-struct IDT_entry IDT[IDT_SIZE];
+struct registers
+{
+    uint32_t ds;                             // Data segment
+    uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax; // Pushed by isr_common_stub
+    uint32_t int_no, err_code;               // Interrupt number and error code
+    uint32_t eip, cs, eflags, useresp, ss;   // Pushed by the processor
+} __attribute__((packed));
+typedef struct registers registers_t;
+
+typedef void (*isr_cb_t)(registers_t);
 
 void idt_init();
+
+void register_cb(uint8_t interrupt, isr_cb_t callback);
+
+#define IRQ0 32
+#define IRQ1 33
+
+#define DIVISION_BY_ZERO            0
+#define DEBUG_EXCEPTION             1
+#define NON_MASKABLE_INTERRUPT      2
+#define BREAKPOINT_EXCEPTION        3
+#define INTO_DETECTED_OVERFLOW      4
+#define OUT_OF_BOUNDS_EXCEPTION     5
+#define INVALID_OPCODE_EXCEPTION    6
+#define NO_COPROCESSOR_EXCEPTION    7
+#define DOUBLE_FAULT                8
+#define COPROCESSOR_SEGMENT_OVERRUN 9
+#define BAD_TSS                     10
+#define SEGMENT_NOT_PRESENT         11
+#define STACK_FAULT                 12
+#define GENERAL_PROTECTION_FAULT    13
+#define PAGE_FAULT                  14
+#define UNKNOWN_INTERRUPT_EXCEPTION 15
+#define COPROCESSOR_FAULT           16
+#define ALIGNMENT_CHECK_EXCEPTION   17
+#define MACHINE_CHECK_EXCEPTION     18
 
 #endif

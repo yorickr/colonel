@@ -1,5 +1,11 @@
 #include <kernel/keyboard.h>
 #include <kernel/pic.h>
+#include <kernel/port.h>
+#include <kernel/tty.h>
+#include <kernel/idt.h>
+
+#include <stdint.h>
+#include <stdio.h>
 
 unsigned char keyboard_map[128] =
 {
@@ -41,8 +47,23 @@ unsigned char keyboard_map[128] =
     0,	/* All other keys are undefined */
 };
 
+void keyboard_handler() {
+    uint8_t status = inb(KEYBOARD_STATUS_PORT);
+    if (status & 0x01) {
+        char keycode = inb(KEYBOARD_DATA_PORT);
+        if (keycode < 0) {
+            return;
+        }
+        uint8_t key = keyboard_map[keycode];
+        terminal_putchar(key);
+    }
+}
+
 void kb_init() {
+    printf("Initializing keyboard\n");
     // Enables irq1 which is the keyboard.
     // 11111101
 	outb(MASTER_DATA , 0xFD);
+
+    register_cb(IRQ1, keyboard_handler);
 }
