@@ -1,4 +1,5 @@
 #include <kernel/keyboard.h>
+#include <kernel/pic.h>
 
 unsigned char keyboard_map[128] =
 {
@@ -41,20 +42,7 @@ unsigned char keyboard_map[128] =
 };
 
 void kb_init() {
-	// 11111101 - enables only IRQ1 which is the keyboard
-	outb(0x21 , 0xFD);
-}
-
-void keyboard_handler_main() {
-	outb(0x20, 0x20); // send EOI, End of Interrupt.
-
-	uint8_t status = inb(KEYBOARD_STATUS_PORT);
-	if (status & 0x01) {
-		char keycode = inb(KEYBOARD_DATA_PORT);
-		if (keycode < 0) {
-			return;
-		}
-		uint8_t key = keyboard_map[keycode];
-		terminal_putchar(key);
-	}
+    // Enables irq1 which is the keyboard.
+    // 11111101
+	outb(MASTER_DATA , 0xFD);
 }

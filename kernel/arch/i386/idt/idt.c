@@ -3,6 +3,7 @@
 #include <kernel/port.h>
 #include <kernel/asm.h>
 #include <kernel/tty.h>
+#include <kernel/pic.h>
 
 extern void load_idt(struct idt_ptr *idt_ptr);
 
@@ -50,8 +51,36 @@ extern void isr29();
 extern void isr30();
 extern void isr31();
 
+extern void irq0();
+extern void irq1();
+extern void irq2();
+extern void irq3();
+extern void irq4();
+extern void irq5();
+extern void irq6();
+extern void irq7();
+extern void irq8();
+extern void irq9();
+extern void irq10();
+extern void irq11();
+extern void irq12();
+extern void irq13();
+extern void irq14();
+extern void irq15();
+
 void isr_cb(registers_t regs) {
 	terminal_writestring("Received isr\n");
+}
+
+void irq_cb(registers_t regs) {
+    terminal_writestring("Received irq\n");
+    if (regs.int_no >= 40) {
+        outb(SLAVE_CMD, EOI);
+    }
+    outb(MASTER_CMD, EOI); // send EOI
+
+    // Handle callback.
+
 }
 
 void idt_create_entry(uint8_t id, uint32_t base, uint16_t sel, uint8_t flags) {
@@ -101,46 +130,28 @@ void idt_init() {
     idt_create_entry(30, (uint32_t)isr30, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
     idt_create_entry(31, (uint32_t)isr31, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
 
-	idt_create_entry(0x21, (uint32_t)keyboard_handler, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
+    idt_create_entry(32, (uint32_t)irq0, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
+    idt_create_entry(33, (uint32_t)irq1, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
+    idt_create_entry(34, (uint32_t)irq2, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
+    idt_create_entry(35, (uint32_t)irq3, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
+    idt_create_entry(36, (uint32_t)irq4, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
+    idt_create_entry(37, (uint32_t)irq5, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
+    idt_create_entry(38, (uint32_t)irq6, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
+    idt_create_entry(39, (uint32_t)irq7, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
+    idt_create_entry(40, (uint32_t)irq8, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
+    idt_create_entry(41, (uint32_t)irq9, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
+    idt_create_entry(42, (uint32_t)irq10, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
+    idt_create_entry(43, (uint32_t)irq11, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
+    idt_create_entry(44, (uint32_t)irq12, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
+    idt_create_entry(45, (uint32_t)irq13, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
+    idt_create_entry(46, (uint32_t)irq14, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
+    idt_create_entry(47, (uint32_t)irq15, KERNEL_CODE_SEGMENT_OFFSET, INTERRUPT_GATE);
 
-	/*     Ports
-	*	 PIC1	PIC2
-	*Command 0x20	0xA0
-	*Data	 0x21	0xA1
-	*/
-
-	/* ICW1 - begin initialization */
-	outb(0x20 , 0x11);
-	outb(0xA0 , 0x11);
-
-	/* ICW2 - remap offset address of IDT */
-	/*
-	* In x86 protected mode, we have to remap the PICs beyond 0x20 because
-	* Intel have designated the first 32 interrupts as "reserved" for cpu exceptions
-	*/
-	outb(0x21 , 0x20);
-	outb(0xA1 , 0x28);
-
-	/* ICW3 - setup cascading */
-	outb(0x21 , 0x00);
-	outb(0xA1 , 0x00);
-
-	/* ICW4 - environment info */
-	outb(0x21 , 0x01);
-	outb(0xA1 , 0x01);
-	/* Initialization finished */
-
-	/* mask interrupts */
-	outb(0x21 , 0xff);
-	outb(0xA1 , 0xff);
-
-	/* fill the IDT descriptor */
-	// The IDT descriptor consists of a limit and a base.
 	struct idt_ptr idt_ptr;
 	idt_address = (uint32_t)IDT ;
 	idt_ptr.limit = (sizeof (struct IDT_entry) * IDT_SIZE) + ((idt_address & 0xffff) << 16);
 	idt_ptr.base = idt_address >> 16 ;
 
     load_idt(&idt_ptr);
-	as_sti();
+	as_sti(); // enable interrupts after setting up the idt.
 }
